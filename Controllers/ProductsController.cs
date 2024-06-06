@@ -14,19 +14,25 @@ namespace AG.Products.API.Controllers
     {
         private readonly IProductQueries _productQueries;
         private readonly ISender _mediator;
+        private readonly ILogger<ProductsController> _logger;
 
         public ProductsController(
             IProductQueries productQueries,
-            ISender mediator)
+            ISender mediator,
+            ILogger<ProductsController> logger
+            )
         {
             _productQueries = productQueries;
             _mediator = mediator;
+            _logger = logger;
         }
 
         // GET: api/<Products>
         [HttpGet]
         public async Task<IActionResult> Get(CancellationToken cancellationToken, [FromQuery] int page = 1, int pageSize = 10, string? searchTerm = null, bool activeOnly = true)
         {
+            _logger.LogInformation("Serilog: Getting all products");
+
             var productsDto = await _productQueries.GetAllProducts(cancellationToken, page, pageSize, searchTerm, activeOnly);
             return Ok(productsDto);
         }

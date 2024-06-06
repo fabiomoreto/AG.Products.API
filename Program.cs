@@ -2,8 +2,11 @@ using AG.Products.API.Application.Mappings;
 using AG.Products.API.Application.Queries;
 using AG.Products.API.Infra.DependencyInjection;
 using AG.Products.API.Infra.Exceptions;
-using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Serilog;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,14 +25,19 @@ builder.Services.AddProblemDetails();
 //Queries
 builder.Services.AddScoped<IProductQueries, ProductQueries>();
 //MediatR
-builder.Services.AddMediatR(cfg => 
-{ 
-    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()); 
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
 });
+
+// Serilog
+builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
 builder.AddSwaggerConfiguration();
 
 builder.AddDataConfiguration();
+
+//builder.AddHealthCheckConfiguration();
 
 var app = builder.Build();
 
@@ -46,5 +54,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseExceptionHandler();
+
+//app.UseHealthChecks("/health");
 
 app.Run();
